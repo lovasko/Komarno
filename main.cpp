@@ -2,6 +2,41 @@
 #include <cmath>
 #include <vector>
 
+#include <SDL/SDL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+
+SDL_Surface *surface;
+
+void
+init_sdl ()
+{
+	const SDL_VideoInfo *video_info;
+
+	if (SDL_Init( SDL_INIT_VIDEO ) < 0)
+	{
+		fprintf(stderr, "Video initialization failed: %s", SDL_GetError());
+		quit(1);
+	}
+
+	video_info = SDL_GetVideoInfo();
+	if (!video_info)
+	{
+		fprintf(stderr, "Video info query failed: %s",
+		SDL_GetError());
+		quit(1);
+	}
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 0);
+
+	surface = SDL_SetVideoMode(600, 600, 32, SDL_OPENGL | SDL_GL_DOUBLEBUFFER); 
+	if (!surface)
+	{
+		fprintf(stderr, "Video mode set failed: %s", SDL_GetError());
+		quit(1);
+	}
+}
 class Vector2
 {
 	public:

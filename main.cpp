@@ -94,13 +94,19 @@ class Mosquito
 		{
 			Mosquito m;
 
-			m.velocity.x = (float)(rand() % 1000) / 1000.0f;
-			m.velocity.y = (float)(rand() % 1000) / 1000.0f;
-			/* m.velocity.x = (float)(rand() % 1000) / 1000.0f - 0.5f; */
-			/* m.velocity.y = (float)(rand() % 1000) / 1000.0f - 0.5f; */
+			m.velocity.x = (float)(rand() % 1000) / 1000.0f - 0.5f;
+			m.velocity.y = (float)(rand() % 1000) / 1000.0f - 0.5f;
 
-			m.position.x = (float)(rand() % 600);
-			m.position.y = (float)(rand() % 600);
+			if (rand() % 2 == 0)
+			{
+				m.position.x = (float)(rand() % 300);
+				m.position.y = (float)(rand() % 300);
+			}
+			else
+			{
+				m.position.x = (float)(rand() % 300) + 300;
+				m.position.y = (float)(rand() % 300) + 300;
+			}
 
 			return m;
 		}
@@ -183,7 +189,7 @@ rule_1 (Mosquito& _m, std::vector<Mosquito> _swarm)
 	mass_centre /= (_swarm.size() - 1);
 
 	Vector2 direction = mass_centre - _m.position;	
-	direction /= 70.0f;
+	direction /= 50.0f;
 
 	return direction;
 }
@@ -198,7 +204,7 @@ rule_2 (Mosquito& _m, std::vector<Mosquito> _swarm)
 		if (&_m != &m)
 		{
 			Vector2 difference = m.position - _m.position;
-			if (difference.length() < 10.0f)
+			if (difference.length() < 20.0f)
 				centre -= difference;
 		}
 	}
@@ -222,7 +228,7 @@ rule_3 (Mosquito& _m, std::vector<Mosquito> _swarm)
 
 	Vector2 result;
 	result = velocity - _m.velocity;
-	result /= 8.0f;
+	result /= 2.0f;
 
 	return result;
 }
@@ -234,6 +240,10 @@ rule_4 (Mosquito& _m)
 	Vector2 bottom_velocity;
 	Vector2 left_velocity;
 	Vector2 right_velocity;
+
+	if (_m.position.x == 0.0f || _m.position.y == 0.0f ||
+	    _m.position.x == 600.0f || _m.position.y == 600.0f)
+		return Vector2();
 
 	top_velocity.y = fabs(20.0f / _m.position.y);	
 	bottom_velocity.y = -fabs(20.0f / (_m.position.y - 600.0f));	
@@ -283,7 +293,7 @@ step (std::vector<Mosquito>& _swarm)
 		new_mosquito.velocity = m.velocity + velocity;
 		new_mosquito.position = m.position + new_mosquito.velocity;
 
-		if (new_mosquito.velocity.length() > 0.4)
+		if (new_mosquito.velocity.length() > 0.6)
 			new_mosquito.velocity /= 10.0f;
 
 		new_swarm.push_back(new_mosquito);
@@ -330,7 +340,7 @@ main_loop (std::vector<Mosquito>& _swarm)
 int 
 main (int argc, char *argv[])
 {
-	const unsigned int N = 200;
+	const unsigned int N = 50;
 	std::vector<Mosquito> swarm;
 	srand(time(NULL));
 

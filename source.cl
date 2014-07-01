@@ -113,7 +113,7 @@ single_step (__global mosquito* _swarm, __global float2* _rule_1,
 	    + _rule_5[idx];
 	velocity /= 10000.0f;
 
-	if (velocity.length() > 0.2f)
+	if (fast_length(velocity) > 0.2f)
 		velocity = normalize(velocity) * 0.2f;
 
 	_new_swarm[idx].velocity = _swarm[idx].velocity + velocity;

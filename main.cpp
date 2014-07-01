@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <vector>
+#include <chrono>
 #include <SDL/SDL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -115,6 +116,7 @@ class Mosquito
 		draw ()
 		{
 			glLoadIdentity();
+			glColor3ub(0, 99, 0);
 
 			glTranslatef(position.x, position.y, 0.0f);
 			glRotatef(atan2(velocity.y, velocity.x) * 180.0f / M_PI + 90.0f, 0.0f, 0.0f, 1.0f);
@@ -127,6 +129,43 @@ class Mosquito
 			glEnd();
 		}
 
+};
+
+class Dragonfly
+{
+	public:
+		Vector2 velocity;
+		Vector2 position;
+
+		static Dragonfly 
+		random ()
+		{
+			Dragonfly d;
+
+			d.velocity.x = (float)(rand() % 1000) / 1000.0f - 0.5f;
+			d.velocity.y = (float)(rand() % 1000) / 1000.0f - 0.5f;
+			d.position.x = (float)(rand() % 600);
+			d.position.y = (float)(rand() % 600);
+
+			return d;
+		}
+
+		void
+		draw ()
+		{
+			glLoadIdentity();
+			glColor3ub(111, 0, 0);
+
+			glTranslatef(position.x, position.y, 0.0f);
+			glRotatef(atan2(velocity.y, velocity.x) * 180.0f / M_PI + 90.0f, 0.0f, 0.0f, 1.0f);
+
+			glBegin(GL_QUADS);
+				glVertex2f(-4.0f, -8.0f);
+				glVertex2f( 4.0f, -8.0f);
+				glVertex2f( 4.0f,  8.0f);
+				glVertex2f(-4.0f,  8.0f);
+			glEnd();
+		}
 };
 
 Vector2
@@ -159,7 +198,7 @@ operator/= (Vector2& _v, float _s)
 }
 
 Vector2&
-operator+= (Vector2& _a, Vector2& _b)
+operator+= (Vector2 & _a, Vector2 const& _b)
 {
   _a.x += _b.x;
   _a.y += _b.y;
@@ -258,19 +297,43 @@ rule_4 (Mosquito& _m)
 	return result;
 }
 
+Vector2
+rule_5 (Mosquito& _m, Dragonfly& _d)
+{
+	Vector2 result = _m.position - _d.position;
+	result /= 60.0;
+
+	return result;
+}
+
+Vector2
+hunt (Dragonfly& _d, std::vector<Mosquito>& _swarm)
+{
+	Vector2 closest = _d.position - _swarm[0].position;
+
+	for (auto& m : _swarm)
+		if ((_d.position - m.position).length() < closest.length())
+			closest = (_d.position - m.position);
+
+	closest /= -35.0f;
+
+	return closest;
+}
+
 void
-draw_scene (std::vector<Mosquito>& _swarm)
+draw_scene (std::vector<Mosquito>& _swarm, Dragonfly& _dragonfly)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	glColor3ub(0, 99, 0);
 	for (auto& m : _swarm)
 		m.draw();
+
+	_dragonfly.draw();
 }
 
 std::vector<Mosquito>
-step (std::vector<Mosquito>& _swarm)
+step (std::vector<Mosquito>& _swarm, Dragonfly& _dragonfly)
 {
 	std::vector<Mosquito> new_swarm;
 
@@ -280,12 +343,14 @@ step (std::vector<Mosquito>& _swarm)
 		Vector2 v2 = rule_2(m, _swarm);
 		Vector2 v3 = rule_3(m, _swarm);
 		Vector2 v4 = rule_4(m);
+		Vector2 v5 = rule_5(m, _dragonfly);
 
 		Vector2 velocity;
 		velocity += v1;
 		velocity += v2;
 		velocity += v3;
 		velocity += v4;
+		velocity += v5;
 
 		velocity /= 10000.0f;
 
@@ -303,7 +368,7 @@ step (std::vector<Mosquito>& _swarm)
 }
 
 void
-main_loop (std::vector<Mosquito>& _swarm)
+main_loop (std::vector<Mosquito>& _swarm, Dragonfly& _dragonfly)
 {
 	is_active = true;
 	SDL_Event event;
@@ -328,10 +393,16 @@ main_loop (std::vector<Mosquito>& _swarm)
 			}
 		}
 
+			
 		if (is_active)
 		{
-			_swarm = step(_swarm);
-			draw_scene(_swarm);
+			_swarm = step(_swarm, _dragonfly);
+			_dragonfly.velocity += hunt(_dragonfly, _swarm);
+			if (_dragonfly.velocity.length() > 0.2)
+				_dragonfly.velocity /= 10.0f;
+			_dragonfly.position += _dragonfly.velocity;
+
+			draw_scene(_swarm, _dragonfly);
 			SDL_GL_SwapBuffers();
 		}
 	}
@@ -340,17 +411,19 @@ main_loop (std::vector<Mosquito>& _swarm)
 int 
 main (int argc, char *argv[])
 {
-	const unsigned int N = 50;
+	const unsigned int N = 20;
 	std::vector<Mosquito> swarm;
 	srand(time(NULL));
 
 	for (unsigned int i = 0; i < N; i++)
 		swarm.push_back(Mosquito::random());	
 
+	Dragonfly dragonfly = Dragonfly::random();
+
   init_sdl();
 	init_opengl();
 
-	main_loop(swarm);
+	main_loop(swarm, dragonfly);
 	
 	return EXIT_SUCCESS;	
 }

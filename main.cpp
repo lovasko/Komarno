@@ -508,6 +508,15 @@ device_selection ()
 	return true;
 }
 
+bool
+init_cl ()
+{
+	context = clCreateContext(0, 1, devices, NULL, NULL, &err);
+	command_queue = clCreateCommandQueue(context, device, 0, &err);
+
+	return true;
+}
+
 int 
 main (int argc, char *argv[])
 {
@@ -526,6 +535,9 @@ main (int argc, char *argv[])
 	if (!device_selection())
 		return 1;
 
+	if (!init_cl())
+		return 1;
+
   init_sdl();
 	init_opengl();
 
@@ -533,4 +545,10 @@ main (int argc, char *argv[])
 	
 	return EXIT_SUCCESS;	
 }
+
+	if (!init_cl())
+	if (!init_cl())
+		return 1;
+
+		return 1;
 

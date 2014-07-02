@@ -517,6 +517,53 @@ init_cl ()
 	return true;
 }
 
+bool
+build_cl_program (const char* _filename)
+{
+	int fd = open(_filename, O_RDONLY);
+	struct stat stats;
+	fstat(fd, &stats);
+
+	errno = 0;
+	char* source = (char*)mmap(NULL, stats.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (errno != 0)
+	{
+		printf("ERROR: %s\n", strerror(errno));
+		return false;
+	}
+
+	/* build the code */
+	program = clCreateProgramWithSource(context, 1, (const char**)&source,
+	    (const size_t*)&stats.st_size, &err);
+	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+
+	/* print the build log */
+	cl_build_status build_status;
+	err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
+
+	char *build_log;
+	size_t ret_val_size;
+	err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, NULL, &ret_val_size);
+
+	build_log = new char[ret_val_size+1];
+	err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, ret_val_size, build_log, NULL);
+	build_log[ret_val_size] = '\0';
+	printf("build log: \n %s", build_log);
+
+	return true;
+}
+
+bool
+extract_kernels ()
+{
+	rule_1_kernel = clCreateKernel(program, "rule_1", &err);
+	rule_2_kernel = clCreateKernel(program, "rule_2", &err);
+	rule_3_kernel = clCreateKernel(program, "rule_3", &err);
+	rule_4_kernel = clCreateKernel(program, "rule_4", &err);
+	rule_6_kernel = clCreateKernel(program, "rule_5", &err);
+	single_step_kernel = clCreateKernel(program, "single_step", &err);
+}
+
 int 
 main (int argc, char *argv[])
 {
@@ -536,6 +583,12 @@ main (int argc, char *argv[])
 		return 1;
 
 	if (!init_cl())
+		return 1;
+
+	if (!build_cl_program("source.cl"))
+		return 1;
+	
+	if(!extract_kernels())
 		return 1;
 
   init_sdl();

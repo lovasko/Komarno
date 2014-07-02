@@ -560,8 +560,10 @@ extract_kernels ()
 	rule_2_kernel = clCreateKernel(program, "rule_2", &err);
 	rule_3_kernel = clCreateKernel(program, "rule_3", &err);
 	rule_4_kernel = clCreateKernel(program, "rule_4", &err);
-	rule_6_kernel = clCreateKernel(program, "rule_5", &err);
+	rule_5_kernel = clCreateKernel(program, "rule_5", &err);
 	single_step_kernel = clCreateKernel(program, "single_step", &err);
+
+	return true;
 }
 
 int 
@@ -598,10 +600,4 @@ main (int argc, char *argv[])
 	
 	return EXIT_SUCCESS;	
 }
-
-	if (!init_cl())
-	if (!init_cl())
-		return 1;
-
-		return 1;
 

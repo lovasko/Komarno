@@ -7,6 +7,11 @@
 #include <SDL/SDL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+#include <OpenCL/opencl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
 SDL_Surface *surface;
 bool done = false;

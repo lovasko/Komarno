@@ -17,6 +17,24 @@ SDL_Surface *surface;
 bool done = false;
 bool is_active = true;
 
+cl_context context;
+cl_int err;
+cl_device_id* devices;
+cl_device_id device;
+cl_platform_id* platforms;
+cl_uint num_devices;
+cl_platform_id platform;
+cl_uint num_platforms;
+cl_command_queue command_queue;
+cl_program program;
+cl_event event;
+cl_kernel rule_1_kernel;
+cl_kernel rule_2_kernel;
+cl_kernel rule_3_kernel;
+cl_kernel rule_4_kernel;
+cl_kernel rule_5_kernel;
+cl_kernel single_step_kernel;
+
 void
 init_sdl ()
 {

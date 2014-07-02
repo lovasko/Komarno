@@ -431,6 +431,40 @@ main_loop (std::vector<Mosquito>& _swarm, Dragonfly& _dragonfly)
 	}
 }
 
+bool
+platform_selection ()
+{
+	err = clGetPlatformIDs (0, NULL, &num_platforms);
+	if (num_platforms == 0)
+	{
+		printf("No platforms.\n");
+		return false;
+	}
+	platforms = new cl_platform_id[num_platforms];
+	err = clGetPlatformIDs (num_platforms, platforms, NULL);
+
+	/* let the user to choose the platform */
+	printf("Select the platform: \n");
+	for (unsigned int i = 0; i < num_platforms; i++)
+	{
+		char name[1024];
+		err = clGetPlatformInfo (platforms[i], CL_PLATFORM_NAME, 1024, &name, NULL);
+		printf("%d) %s\n", i+1, name);
+	}
+	
+	int selected_platform;
+	scanf("%d", &selected_platform);
+
+	/* check the selection for errors */
+	if (selected_platform < 1 || selected_platform > num_platforms)
+	{
+		printf("Selection failed: not such platform number.\n");
+		return false;
+	}
+
+	return true;
+}
+
 int 
 main (int argc, char *argv[])
 {
@@ -443,6 +477,9 @@ main (int argc, char *argv[])
 
 	Dragonfly dragonfly = Dragonfly::random();
 
+	if (!platform_selection())
+		return 1;
+
   init_sdl();
 	init_opengl();
 
@@ -450,4 +487,10 @@ main (int argc, char *argv[])
 	
 	return EXIT_SUCCESS;	
 }
+
+	if (!platform_selection())
+		return 1;
+
+	if (!platform_selection())
+		return 1;
 

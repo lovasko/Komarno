@@ -465,6 +465,44 @@ platform_selection ()
 	return true;
 }
 
+bool
+device_selection ()
+{
+	err = clGetDeviceIDs(platforms[selected_platform-1], CL_DEVICE_TYPE_GPU, 0, 
+	    NULL, &num_devices);
+	if (num_devices == 0)
+	{
+		printf("No devices.\n");
+		return false;
+	}
+
+	devices = new cl_device_id[num_devices];
+	err = clGetDeviceIDs(platforms[selected_platform-1], CL_DEVICE_TYPE_GPU, 
+	    num_devices, devices, NULL);
+
+	/* let the user to choose the device */
+	printf("Select the device: \n");
+	for (unsigned int i = 0; i < num_devices; i++)
+	{
+		char name[1024];
+		err = clGetDeviceInfo (devices[i], CL_DEVICE_NAME, 1024, &name, NULL);
+		printf("%d) %s\n", i+1, name);
+	}
+
+	int selected_device;
+	scanf("%d", &selected_device);
+
+	/* check the selection for errors */
+	if (selected_device < 1 || selected_device > num_devices)
+	{
+		printf("Selection failed: not such device number.\n");
+		return false;
+	}
+
+	device = devices[selected_device-1];
+	return true;
+}
+
 int 
 main (int argc, char *argv[])
 {
@@ -480,6 +518,9 @@ main (int argc, char *argv[])
 	if (!platform_selection())
 		return 1;
 
+	if (!device_selection())
+		return 1;
+
   init_sdl();
 	init_opengl();
 
@@ -492,5 +533,8 @@ main (int argc, char *argv[])
 		return 1;
 
 	if (!platform_selection())
+		return 1;
+
+	if (!device_selection())
 		return 1;
 

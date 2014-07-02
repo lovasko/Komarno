@@ -19,15 +19,19 @@ bool is_active = true;
 
 cl_context context;
 cl_int err;
+
 cl_device_id* devices;
 cl_device_id device;
-cl_platform_id* platforms;
 cl_uint num_devices;
+
+cl_platform_id* platforms;
 cl_platform_id platform;
 cl_uint num_platforms;
+
 cl_command_queue command_queue;
 cl_program program;
 cl_event event;
+
 cl_kernel rule_1_kernel;
 cl_kernel rule_2_kernel;
 cl_kernel rule_3_kernel;
@@ -462,13 +466,14 @@ platform_selection ()
 		return false;
 	}
 
+	platform = platforms[selected_platform-1];
 	return true;
 }
 
 bool
 device_selection ()
 {
-	err = clGetDeviceIDs(platforms[selected_platform-1], CL_DEVICE_TYPE_GPU, 0, 
+	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, 
 	    NULL, &num_devices);
 	if (num_devices == 0)
 	{
@@ -477,7 +482,7 @@ device_selection ()
 	}
 
 	devices = new cl_device_id[num_devices];
-	err = clGetDeviceIDs(platforms[selected_platform-1], CL_DEVICE_TYPE_GPU, 
+	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 
 	    num_devices, devices, NULL);
 
 	/* let the user to choose the device */
@@ -528,13 +533,4 @@ main (int argc, char *argv[])
 	
 	return EXIT_SUCCESS;	
 }
-
-	if (!platform_selection())
-		return 1;
-
-	if (!platform_selection())
-		return 1;
-
-	if (!device_selection())
-		return 1;
 

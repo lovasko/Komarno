@@ -1,0 +1,64 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+\newcommand{\BigO}[1]{\ensuremath{\operatorname{O}\bigl(#1\bigr)}}
+\begin{document}
+	\begin{center}
+	{\Huge \bf Swarm Simulation} \\
+	{\large Daniel Lovasko} \\[1\baselineskip]
+	\end{center}
+\section*{Introduction}
+Swarm simulation written in C++ with usage of graphics libraries SDL and
+OpenGL, while utilising the computing power of OpenCL. The swarm is composed of
+its members, {\it mosquitoes}, and contains predators, {\it dragonflies}.
+This document aims to describe the algorithms and ideas used in the program.
+
+\section{Mosquito Rules} This section describes the behavior of the swarm
+members - mosquitoes. Altogether, they obey 5 basic rules, each with different
+weights. Each rule computes a final velocity. Afterwards, all rules are
+combined with simple component-wise vector addition and added to the velocity
+of the mosquito in question.
+
+\subsection{Rule 1 - Perceived Centre of Mass}
+Each mosquito understands the power of the group and therefore tries to stick
+with the swarm. It analyzes the positions of {\it all other} mosquitoes and
+computes the {\it arithmetic mean} of these positions and tries to head to this
+location.
+\subsection{Rule 2 - Personal Space}
+Each mosquito needs some personal space to breathe and live happily. By
+searching the perimeter of the desired personal circle, it chooses to move away
+from all other members of the swarm in this circle.
+\subsection{Rule 3 - Velocity Matching}
+Trying to keep with the swarm is vital to using the "public knowledge" and each
+mosquito tries to mimic the velocity of other swarm members. For example, the
+mosquito in front sees a predator and the rule 5 overpowers all other, he tries
+to escape in completely other direction. Other mosquitoes, while combining this
+rule with the rule 5 of their own, get persuaded to change their direction too.
+\subsection{Rule 4 - Border Force}
+In order to keep the game of life in some bounded space, each border possesses
+a anti-force: top border pushes the mosquito down, left border right, bottom up
+and right to the left. As a consequence, nobody is able to escape the pond.
+\subsection{Rule 5 - Fear of the Predator}
+The motivation behind this rule needs no explanation. Simply, the closer the
+predator is, the higher the motivation to escape.
+
+\section{Dragonfly Rules} This section describes the behavior of the predator -
+the dragonfly. There is only one rule used, but many possible variants or
+improvements exists and are described too.
+\subsection{Used Rule - Chase the Closest}
+Choose the closest mosquito from the swarm and try to catch it. This ensures
+the never-ending dynamic of the swarm, since it motivates the flow at each
+time.
+\subsection{Possible Rule - Chase the Centre of Mass}
+Analyze where the centre of the mass lays and try to move there. This,
+unfortunately, seems as only a short-time strategy. The swarm creates a circle
+around the predator and does not move (or moves only slightly from edge to
+edge) without releasing the predator. Even though he is happy being in the
+centre of the mass, he is unable to catch anybody.
+
+\subsection{Possible Rule - Chase the Slowest Member of the Swarm}
+Strategy that may result in success - only the predator needs to be faster than
+the motivation of the swarm member to escape.
+
+\end{document}
+
